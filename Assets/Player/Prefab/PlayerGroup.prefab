@@ -511,7 +511,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4010203572
+  GlobalObjectIdHash: 3391008115
   InScenePlacedSourceGlobalObjectIdHash: 2090504213
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -760,6 +760,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6060509552982298880}
   - component: {fileID: 594258527013913319}
+  - component: {fileID: 7580856724210488103}
   m_Layer: 0
   m_Name: FreeLook Camera
   m_TagString: Untagged
@@ -890,6 +891,18 @@ MonoBehaviour:
   - {fileID: 3921260466940943398}
   - {fileID: 7594343329617719229}
   - {fileID: 8160423668772400722}
+--- !u!114 &7580856724210488103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5821437734355351803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 928822fc6af362a43894e4ddf4205d1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6482571845044168080
 GameObject:
   m_ObjectHideFlags: 3

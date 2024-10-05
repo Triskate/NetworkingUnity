@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement Parameters")]
     [SerializeField] float speed = 4f;
@@ -35,15 +35,25 @@ public class PlayerController : MonoBehaviour
         bomb.action.performed += OnBomb;
     }
 
+    Vector3 movementFromClient = Vector3.zero;
     private void Update()
     {
         //rigidbody.velocity = rawMove * speed;
 
-        Vector3 forward = rawMove.z * mainCamera.transform.forward;
-        Vector3 right = rawMove.x * mainCamera.transform.right;
-        Vector3 movement = Vector3.ProjectOnPlane(forward + right, Vector3.up).normalized;
+        if (IsLocalPlayer) 
+        {
+            Vector3 forward = rawMove.z * mainCamera.transform.forward;
+            Vector3 right = rawMove.x * mainCamera.transform.right;
+            Vector3 movement = Vector3.ProjectOnPlane(forward + right, Vector3.up).normalized;
 
-        rigidbody.velocity = movement * speed;
+            SetMoveValue_ServerRpc(movement);
+            //rigidbody.velocity = movement * speed;
+        }
+
+        if (IsServer || IsHost)
+        {
+            rigidbody.velocity = movementFromClient * speed;
+        }
     }
 
     private void OnDisable()
@@ -68,10 +78,17 @@ public class PlayerController : MonoBehaviour
     }
     void OnJump(InputAction.CallbackContext ctx)
     {
-        Debug.Log("OnJump");
+        Vector3 jump = new Vector3(0f,0.1f,0f);
+        rigidbody.AddForce(jump, ForceMode.Impulse);
     }
     void OnBomb(InputAction.CallbackContext ctx)
     {
         Debug.Log("OnBomb");
+    }
+
+    [Rpc(SendTo.Server)]
+    void SetMoveValue_ServerRpc(Vector3 moveValue)
+    {
+        movementFromClient = moveValue;
     }
 }
