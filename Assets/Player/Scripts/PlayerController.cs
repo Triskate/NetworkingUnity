@@ -78,8 +78,7 @@ public class PlayerController : NetworkBehaviour
     }
     void OnJump(InputAction.CallbackContext ctx)
     {
-        Vector3 jump = new Vector3(0f,0.1f,0f);
-        rigidbody.AddForce(jump, ForceMode.Impulse);
+        rigidbody.AddForce(new Vector3(0, 5, 0), ForceMode.Impulse);
     }
     void OnBomb(InputAction.CallbackContext ctx)
     {
