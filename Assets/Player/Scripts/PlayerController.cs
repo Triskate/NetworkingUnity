@@ -8,19 +8,28 @@ public class PlayerController : NetworkBehaviour
 {
     [Header("Movement Parameters")]
     [SerializeField] float speed = 4f;
+    [SerializeField] float jumpForce = 50f;
+    bool grounded;
 
     [Header("Input Actions")]
     [SerializeField] InputActionReference move;
     [SerializeField] InputActionReference jump;
     [SerializeField] InputActionReference bomb;
 
+    [Header("Bomb")]
+    [SerializeField] GameObject bombObject;
+    [SerializeField] float spawnDistance = 8f;
+
+    // Components
     new Rigidbody rigidbody;
     Camera mainCamera;
+    Transform cameraTransform;
 
     void Awake()
     {
         rigidbody = GetComponent<Rigidbody>();
         mainCamera = Camera.main;
+        cameraTransform = mainCamera.transform;
     }
 
     private void OnEnable()
@@ -38,6 +47,7 @@ public class PlayerController : NetworkBehaviour
     Vector3 movementFromClient = Vector3.zero;
     private void Update()
     {
+
         //rigidbody.velocity = rawMove * speed;
 
         if (IsLocalPlayer) 
@@ -47,7 +57,7 @@ public class PlayerController : NetworkBehaviour
             Vector3 movement = Vector3.ProjectOnPlane(forward + right, Vector3.up).normalized;
 
             SetMoveValue_ServerRpc(movement);
-            //rigidbody.velocity = movement * speed;
+            rigidbody.velocity = movement * speed;
         }
 
         if (IsServer || IsHost)
@@ -78,16 +88,36 @@ public class PlayerController : NetworkBehaviour
     }
     void OnJump(InputAction.CallbackContext ctx)
     {
-        rigidbody.AddForce(new Vector3(0, 5, 0), ForceMode.Impulse);
+        if(grounded)
+        {
+            rigidbody.AddForce(new Vector3(0, jumpForce, 0), ForceMode.Impulse);
+        }
     }
     void OnBomb(InputAction.CallbackContext ctx)
     {
-        Debug.Log("OnBomb");
+        Vector3 spawnPosition = cameraTransform.position + cameraTransform.forward * spawnDistance;
+        Instantiate(bombObject, spawnPosition, cameraTransform.rotation);
     }
 
     [Rpc(SendTo.Server)]
     void SetMoveValue_ServerRpc(Vector3 moveValue)
     {
         movementFromClient = moveValue;
+    }
+
+    // Check if grounded
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == ("Ground"))
+        {
+            grounded = true;
+        }  
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == ("Ground"))
+        {
+            grounded = false;
+        }
     }
 }
