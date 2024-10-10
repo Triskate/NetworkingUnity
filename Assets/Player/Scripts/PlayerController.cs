@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -8,28 +9,25 @@ public class PlayerController : NetworkBehaviour
 {
     [Header("Movement Parameters")]
     [SerializeField] float speed = 4f;
-    [SerializeField] float jumpForce = 50f;
+    [SerializeField] float jumpVelocity = 5f;
     bool grounded;
+
+    [Header("Bomb")]
+    [SerializeField] GameObject bombObject;
 
     [Header("Input Actions")]
     [SerializeField] InputActionReference move;
     [SerializeField] InputActionReference jump;
     [SerializeField] InputActionReference bomb;
 
-    [Header("Bomb")]
-    [SerializeField] GameObject bombObject;
-    [SerializeField] float spawnDistance = 8f;
-
     // Components
     new Rigidbody rigidbody;
     Camera mainCamera;
-    Transform cameraTransform;
 
     void Awake()
     {
         rigidbody = GetComponent<Rigidbody>();
         mainCamera = Camera.main;
-        cameraTransform = mainCamera.transform;
     }
 
     private void OnEnable()
@@ -57,12 +55,26 @@ public class PlayerController : NetworkBehaviour
             Vector3 movement = Vector3.ProjectOnPlane(forward + right, Vector3.up).normalized;
 
             SetMoveValue_ServerRpc(movement);
-            rigidbody.velocity = movement * speed;
+            //rigidbody.velocity = movement * speed;
         }
+    }
 
+    private void FixedUpdate()
+    {
         if (IsServer || IsHost)
         {
-            rigidbody.velocity = movementFromClient * speed;
+            Vector3 finalMovement = movementFromClient * speed;
+            finalMovement.y = rigidbody.velocity.y;
+
+            if (performJump)
+            {
+                performJump = false;
+                {
+                    finalMovement.y = jumpVelocity;
+                }
+            }
+
+            rigidbody.velocity = finalMovement;
         }
     }
 
@@ -86,23 +98,39 @@ public class PlayerController : NetworkBehaviour
         rawMove.x = value.x;
         rawMove.z = value.y;
     }
+    bool performJump = false;
     void OnJump(InputAction.CallbackContext ctx)
     {
-        if(grounded)
+        if (IsLocalPlayer && grounded) 
         {
-            rigidbody.AddForce(new Vector3(0, jumpForce, 0), ForceMode.Impulse);
+            PerformJump_ServerRpc(); 
         }
     }
     void OnBomb(InputAction.CallbackContext ctx)
     {
-        Vector3 spawnPosition = cameraTransform.position + cameraTransform.forward * spawnDistance;
-        Instantiate(bombObject, spawnPosition, cameraTransform.rotation);
+        if (IsLocalPlayer)
+        {
+            LayDownBomb_ServerRpc();
+        }
     }
 
     [Rpc(SendTo.Server)]
     void SetMoveValue_ServerRpc(Vector3 moveValue)
     {
         movementFromClient = moveValue;
+    }
+    [Rpc(SendTo.Server)]
+
+    void LayDownBomb_ServerRpc()
+    {
+        GameObject newBomb = Instantiate(bombObject, transform.position, transform.rotation);
+        newBomb.GetComponent<NetworkObject>().Spawn();
+    }
+
+    [Rpc(SendTo.Server)]
+    void PerformJump_ServerRpc()
+    {
+        performJump = true;
     }
 
     // Check if grounded

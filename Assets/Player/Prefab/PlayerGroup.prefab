@@ -1440,12 +1440,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 4
-  jumpForce: 50
+  jumpForce: 5
+  bombObject: {fileID: 1832418360671354575, guid: 8bc9b02a47ac7ca4e840afbc80ae97d7, type: 3}
   move: {fileID: 4646480917604903950, guid: dc125e638e59d4e4483bfa8687d036f3, type: 3}
   jump: {fileID: -616435458695224985, guid: dc125e638e59d4e4483bfa8687d036f3, type: 3}
   bomb: {fileID: 4324963305911968238, guid: dc125e638e59d4e4483bfa8687d036f3, type: 3}
-  bombObject: {fileID: 8917285622705577879, guid: 8bc9b02a47ac7ca4e840afbc80ae97d7, type: 3}
-  spawnDistance: 8
 --- !u!1 &7968066138179804240
 GameObject:
   m_ObjectHideFlags: 0
