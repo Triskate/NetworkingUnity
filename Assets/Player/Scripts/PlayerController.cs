@@ -64,7 +64,7 @@ public class PlayerController : NetworkBehaviour
         if (IsServer || IsHost)
         {
             Vector3 finalMovement = movementFromClient * speed;
-            finalMovement.y = rigidbody.velocity.y;
+            finalMovement.y = rigidbody.linearVelocity.y;
 
             if (performJump)
             {
@@ -74,7 +74,7 @@ public class PlayerController : NetworkBehaviour
                 }
             }
 
-            rigidbody.velocity = finalMovement;
+            rigidbody.linearVelocity = finalMovement;
         }
     }
 

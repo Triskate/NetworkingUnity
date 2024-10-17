@@ -13,7 +13,6 @@ public class AlwaysLookAtCamera : MonoBehaviour
 
     void Update()
     {
-        transform.rotation = Quaternion.identity;
         transform.LookAt(transform.position - mainCamera.transform.forward, Vector3.up);
     }
 }

@@ -9,9 +9,14 @@ using static UnityEngine.ParticleSystem;
 public class BombScript : NetworkBehaviour
 {
     [Header("Parameters")]
-    [SerializeField] TextMeshPro text;
     [SerializeField] float timeToExplode = 4;
+    [SerializeField] float explosionRadius = 10.0F;
+    [SerializeField] float explosionForce = 300.0F;
+
+    [SerializeField] TextMeshPro countdownText;
+
     NetworkVariable<float> timeLeftToExplode = new();
+
 
     private void Start()
     {
@@ -24,19 +29,31 @@ public class BombScript : NetworkBehaviour
         if (IsHost || IsServer)
         {
             timeLeftToExplode.Value -= Time.deltaTime;
+            if(timeLeftToExplode.Value <= 0) Explode();
         }
-
-        if (IsClient || IsHost)
-        {
-            Debug.Log(timeLeftToExplode.Value);
-        }
-
-        //this.GetComponent<NetworkObject>().Despawn();
     }
 
     private void OnValueChanged(float previousValue, float newValue)
     {
-        int time = (int)newValue;
-        text.SetText(time.ToString());
+        if (IsClient || IsHost)
+        {
+            countdownText.text = $"{Mathf.CeilToInt(newValue)}";
+        }
+    }
+
+    void Explode()
+    {
+        if(IsHost || IsServer) 
+        {
+            Collider[] colliders = Physics.OverlapSphere(transform.position, explosionForce);
+            foreach (Collider collider in colliders)
+            {
+                if (collider.attachedRigidbody)
+                {
+                    collider.attachedRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
+                }
+            }
+            Destroy(gameObject);
+        }
     }
 }
