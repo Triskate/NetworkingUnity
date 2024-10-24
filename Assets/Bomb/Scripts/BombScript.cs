@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.VFX;
 using static UnityEngine.ParticleSystem;
 
 public class BombScript : NetworkBehaviour
@@ -12,6 +13,9 @@ public class BombScript : NetworkBehaviour
     [SerializeField] float timeToExplode = 4;
     [SerializeField] float explosionRadius = 10.0F;
     [SerializeField] float explosionForce = 300.0F;
+
+    [Header("VFX")]
+    [SerializeField] ParticleSystem explosion;
 
     [SerializeField] TextMeshPro countdownText;
 
@@ -43,7 +47,7 @@ public class BombScript : NetworkBehaviour
 
     void Explode()
     {
-        if(IsHost || IsServer) 
+        if (IsHost || IsServer) 
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, explosionForce);
             foreach (Collider collider in colliders)
@@ -54,6 +58,14 @@ public class BombScript : NetworkBehaviour
                 }
             }
             Destroy(gameObject);
+            InstantiateExplosionEffect_ClientRPC();
         }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void InstantiateExplosionEffect_ClientRPC()
+    {
+        ParticleSystem particleSystem = Instantiate(explosion, transform.position, Quaternion.identity);
+        particleSystem.Emit(1);
     }
 }

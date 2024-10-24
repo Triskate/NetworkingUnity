@@ -211,6 +211,7 @@ MonoBehaviour:
   timeToExplode: 4
   explosionRadius: 10
   explosionForce: 300
+  explosion: {fileID: 8277443936082492466, guid: 5f2f12eaa5c6f804eb1297d15c15d2aa, type: 3}
   countdownText: {fileID: 6153310067478687301}
 --- !u!1 &2049416721729711442
 GameObject:
