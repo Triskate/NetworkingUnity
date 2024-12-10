@@ -119,14 +119,15 @@ public class PlayerController : NetworkBehaviour
     {
         movementFromClient = moveValue;
     }
-    [Rpc(SendTo.Server)]
 
+    [Rpc(SendTo.Server)]
     void LayDownBomb_ServerRpc()
     {
         GameObject newBomb = Instantiate(bombObject, transform.position, transform.rotation);
         newBomb.GetComponent<NetworkObject>().Spawn();
     }
 
+    // Remote Process Call
     [Rpc(SendTo.Server)]
     void PerformJump_ServerRpc()
     {
