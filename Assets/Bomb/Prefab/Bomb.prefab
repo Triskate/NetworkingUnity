@@ -208,10 +208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9b973f967cdaae44b984d5f9a1d1e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  explosionPrefab: {fileID: 8304099530342345005, guid: c964adb70a103d84e9930c3ac314c8c3, type: 3}
   timeToExplode: 4
-  explosionRadius: 10
-  explosionForce: 300
-  explosion: {fileID: 8277443936082492466, guid: 5f2f12eaa5c6f804eb1297d15c15d2aa, type: 3}
   countdownText: {fileID: 6153310067478687301}
 --- !u!1 &2049416721729711442
 GameObject:

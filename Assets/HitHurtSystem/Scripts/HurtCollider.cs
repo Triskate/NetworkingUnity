@@ -4,9 +4,9 @@ using UnityEngine.Events;
 
 public class HurtCollider : MonoBehaviour
 {
-    public UnityEvent <HitCollider, HurtCollider> onHurt;
-    internal void NotifyHit(HitCollider hitCollider)
+    public UnityEvent <IHitter, HurtCollider> onHurt;
+    internal void NotifyHit(IHitter hitter)
     {
-        onHurt.Invoke(hitCollider, this);
+        onHurt.Invoke(hitter, this);
     }
 }

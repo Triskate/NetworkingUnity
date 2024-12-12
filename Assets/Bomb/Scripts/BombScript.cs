@@ -9,18 +9,16 @@ using static UnityEngine.ParticleSystem;
 
 public class BombScript : NetworkBehaviour
 {
+    [Header("Prefab")]
+    [SerializeField] GameObject explosionPrefab;
+
     [Header("Parameters")]
     [SerializeField] float timeToExplode = 4;
-    [SerializeField] float explosionRadius = 10.0F;
-    [SerializeField] float explosionForce = 300.0F;
 
-    [Header("VFX")]
-    [SerializeField] ParticleSystem explosion;
-
+    [Header("Countdown")]
     [SerializeField] TextMeshPro countdownText;
 
     NetworkVariable<float> timeLeftToExplode = new();
-
 
     private void Start()
     {
@@ -49,23 +47,8 @@ public class BombScript : NetworkBehaviour
     {
         if (IsHost || IsServer) 
         {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, explosionForce);
-            foreach (Collider collider in colliders)
-            {
-                if (collider.attachedRigidbody)
-                {
-                    collider.attachedRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
-                }
-            }
-            Destroy(gameObject);
-            InstantiateExplosionEffect_ClientRPC();
+           GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+           explosion.GetComponent<NetworkObject>()?.Spawn();
         }
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void InstantiateExplosionEffect_ClientRPC()
-    {
-        ParticleSystem particleSystem = Instantiate(explosion, transform.position, Quaternion.identity);
-        particleSystem.Emit(1);
     }
 }
