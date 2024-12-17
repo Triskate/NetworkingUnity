@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FireWeapon : MonoBehaviour
 {
-    BarrelByRaycast[] barrels;
+    Barrel[] barrels;
 
     [Header("Debug")]
     [SerializeField] bool debugShot;
@@ -18,11 +18,11 @@ public class FireWeapon : MonoBehaviour
 
     private void Awake()
     {
-        barrels = GetComponentsInChildren<BarrelByRaycast>();
+        barrels = GetComponentsInChildren<Barrel>();
     }
     public void Shot()
     {
-        foreach (BarrelByRaycast b in barrels)
+        foreach (Barrel b in barrels)
         {
             b.Shot();
         }

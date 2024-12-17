@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class BarrelByRaycast : MonoBehaviour, IHitter
+public class BarrelByRaycast : Barrel, IHitter
 {
     [SerializeField] float damage = 1f;
     [SerializeField] float range = 30f;
     [SerializeField] LayerMask layerMask = Physics.DefaultRaycastLayers;
 
-    public void Shot()
+    public override void Shot()
     {
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, range, layerMask))
         {

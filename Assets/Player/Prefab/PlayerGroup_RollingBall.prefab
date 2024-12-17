@@ -479,7 +479,7 @@ GameObject:
   - component: {fileID: 2059102094643714747}
   - component: {fileID: 5288127492950775671}
   m_Layer: 0
-  m_Name: PlayerGroup
+  m_Name: PlayerGroup_RollingBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
