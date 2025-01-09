@@ -44,7 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1c66347db3ab3b4d856866fccdc9627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
+  debugShot: 0
+  damage: 0.2
   range: 30
   layerMask:
     serializedVersion: 2
