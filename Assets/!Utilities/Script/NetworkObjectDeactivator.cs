@@ -8,13 +8,15 @@ public class NetworkObjectDeactivator : NetworkBehaviour
     {
         IsClient,
         IsServer,
-        IsHost
+        IsHost,
+        IsOwner,
+        IsNotOwner,
     }
     [SerializeField] Condition deactivationCondition;
 
     private void Start()
     {
-        enabled = !ConditionMeet();
+        gameObject.SetActive(!ConditionMeet());
     }
 
     private bool ConditionMeet()
@@ -24,6 +26,8 @@ public class NetworkObjectDeactivator : NetworkBehaviour
             case Condition.IsClient: return IsClient;
             case Condition.IsServer: return IsServer;
             case Condition.IsHost:   return IsHost;
+            case Condition.IsOwner: return IsOwner;
+            case Condition.IsNotOwner: return !IsOwner;
         }
         return false;
     }
