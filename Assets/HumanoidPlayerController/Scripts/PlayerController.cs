@@ -47,27 +47,24 @@ namespace HumanoidPlayerController
 
         private void OnEnable()
         {
-            if (IsClient || IsHost)
-            {
-                move.action.Enable();
-                run.action.Enable();
-                jump.action.Enable();
+            move.action.Enable();
+            run.action.Enable();
+            jump.action.Enable();
 
-                move.action.performed += OnMove;
-                move.action.canceled += OnMove;
+            move.action.performed += OnMove;
+            move.action.canceled += OnMove;
 
-                run.action.started += OnRun;
-                run.action.canceled += OnRun;
+            run.action.started += OnRun;
+            run.action.canceled += OnRun;
 
-                jump.action.performed += OnJump;
-            }
+            jump.action.performed += OnJump;
         }
 
         Vector3 movementOnPlaneClient;
         Vector3 movementOnPlaneServer;
         private void Update()
         {
-            if (IsClient || IsHost)
+            if (IsClient)
             {
                 // Movimiento
                 Vector3 movement = mainCamera.transform.TransformDirection(rawMovement);
@@ -119,29 +116,29 @@ namespace HumanoidPlayerController
 
         private void OnDisable()
         {
-            if (IsClient || IsHost)
-            {
-                move.action.Disable();
-                run.action.Disable();
-                jump.action.Disable();
+            move.action.Disable();
+            run.action.Disable();
+            jump.action.Disable();
 
-                move.action.performed -= OnMove;
-                move.action.canceled -= OnMove;
+            move.action.performed -= OnMove;
+            move.action.canceled -= OnMove;
 
-                run.action.started -= OnRun;
-                run.action.canceled -= OnRun;
+            run.action.started -= OnRun;
+            run.action.canceled -= OnRun;
 
-                jump.action.performed -= OnJump;
-            }
+            jump.action.performed -= OnJump;
         }
 
         Vector3 rawMovement;
         private void OnMove(InputAction.CallbackContext context)
         {
-            Vector2 movementValue = context.ReadValue<Vector2>();
-            rawMovement = Vector3.zero;
-            rawMovement.x = movementValue.x;
-            rawMovement.z = movementValue.y;
+            if (IsClient)
+            {
+                Vector2 movementValue = context.ReadValue<Vector2>();
+                rawMovement = Vector3.zero;
+                rawMovement.x = movementValue.x;
+                rawMovement.z = movementValue.y;
+            }
         }
         private void OnRun(InputAction.CallbackContext context)
         {
