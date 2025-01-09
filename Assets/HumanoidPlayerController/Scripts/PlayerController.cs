@@ -98,15 +98,8 @@ namespace HumanoidPlayerController
 
             if (IsServer)
             {
-                // SmoothVelocity
-                float transicionAcceleration = desiredSpeed == Vector3.zero ? decceleration : acceleration;
-                Vector3 speedTransitionDirection = desiredSpeed - currentSpeed;
-                float speedTransitionDistance = speedTransitionDirection.magnitude;
-                if (speedTransitionDistance < transicionAcceleration * Time.deltaTime) { currentSpeed = desiredSpeed; }
-                else { currentSpeed += speedTransitionDirection.normalized * transicionAcceleration * Time.deltaTime; }
-
                 // Movimiento
-                characterController.Move(currentSpeed * Time.deltaTime);
+                characterController.Move(VelocitySmoothing() * Time.deltaTime);
 
                 // Orientación
                 float angularDistance = Vector3.SignedAngle(transform.forward, desiredForwardServer, Vector3.up);
@@ -175,6 +168,19 @@ namespace HumanoidPlayerController
         private void OnJump(InputAction.CallbackContext context)
         {
             throw new NotImplementedException();
+        }
+
+        // Utilities
+
+        private Vector3 VelocitySmoothing()
+        {
+            float transicionAcceleration = desiredSpeed == Vector3.zero ? decceleration : acceleration;
+            Vector3 speedTransitionDirection = desiredSpeed - currentSpeed;
+            float speedTransitionDistance = speedTransitionDirection.magnitude;
+            if (speedTransitionDistance < transicionAcceleration * Time.deltaTime) { currentSpeed = desiredSpeed; }
+            else { currentSpeed += speedTransitionDirection.normalized * transicionAcceleration * Time.deltaTime; }
+
+            return currentSpeed;
         }
     }
 }
