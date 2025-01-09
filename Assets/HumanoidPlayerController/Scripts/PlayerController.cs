@@ -79,7 +79,7 @@ namespace HumanoidPlayerController
                 switch (orientationMode)
                 {
                     case OrientationMode.MovementDirection:
-                        desiredForwardClient = movementOnPlaneServer;
+                        desiredForwardClient = movementOnPlaneClient;
                         break;
                     case OrientationMode.CameraForward:
                         desiredForwardClient = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up);
