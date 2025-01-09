@@ -435,7 +435,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 697822b6b2507d346a02a17f891cc9e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deactivationCondition: 1
+  deactivationCondition: 4
 --- !u!1 &7594348908384665937
 GameObject:
   m_ObjectHideFlags: 0

@@ -132,7 +132,7 @@ namespace HumanoidPlayerController
         Vector3 rawMovement;
         private void OnMove(InputAction.CallbackContext context)
         {
-            if (IsClient)
+            if (IsOwner)
             {
                 Vector2 movementValue = context.ReadValue<Vector2>();
                 rawMovement = Vector3.zero;
