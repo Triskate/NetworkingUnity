@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class WeaponManager : MonoBehaviour
+public class WeaponManager : NetworkBehaviour
 {
     [SerializeField] InputActionReference changeWeapon;
     [SerializeField] InputActionReference shoot;
@@ -36,22 +37,25 @@ public class WeaponManager : MonoBehaviour
 
     private void OnChangeWeapon(InputAction.CallbackContext context)
     {
-        Vector2 delta = context.ReadValue<Vector2>();
-
-        if (currentWeapon != -1) { fireWeapons[currentWeapon].NotifyDeselected(); }
-
-        if (delta.y > 0) 
+        if (IsLocalPlayer)
         {
-            currentWeapon++;
-            if (currentWeapon >= fireWeapons.Length) { currentWeapon = -1; }
-        }
-        else
-        {
-            currentWeapon--;
-            if (currentWeapon < -1) { currentWeapon = fireWeapons.Length - 1; }
-        }
+            Vector2 delta = context.ReadValue<Vector2>();
 
-        if (currentWeapon != -1) { fireWeapons[currentWeapon].NotifySelected(); }
+            if (currentWeapon != -1) { fireWeapons[currentWeapon].NotifyDeselected(); }
+
+            if (delta.y > 0)
+            {
+                currentWeapon++;
+                if (currentWeapon >= fireWeapons.Length) { currentWeapon = -1; }
+            }
+            else
+            {
+                currentWeapon--;
+                if (currentWeapon < -1) { currentWeapon = fireWeapons.Length - 1; }
+            }
+
+            if (currentWeapon != -1) { fireWeapons[currentWeapon].NotifySelected(); }
+        }
     }
 
     private void OnShoot(InputAction.CallbackContext context)

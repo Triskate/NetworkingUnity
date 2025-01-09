@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class HumanoidLife : MonoBehaviour
+public class HumanoidLife : NetworkBehaviour
 {
     [SerializeField] float startingLife = 1f;
     [SerializeField] float currentLife;
@@ -28,18 +29,44 @@ public class HumanoidLife : MonoBehaviour
         hurtCollider.onHurt.RemoveListener(OnHurt);
     }
 
-    private void OnHurt(IHitter arg0, HurtCollider arg1)
+    private void OnHurt(IHitter hitter, HurtCollider hurtCollider)
     {
-        if (currentLife > 0)
+        if (IsLocalPlayer)
         {
-            currentLife -= arg0.GetDamage();
-            onLifeChanged.Invoke(this, currentLife);
-            if (currentLife < 0) { onLifeDepleted.Invoke(this); }
+            GetHurted(hitter.GetDamage());
+        }
+        else
+        {
+            GetHurted_ServerRPC(hitter.GetDamage());
         }
     }
 
     internal void RestoreToStartingLife()
     {
         currentLife = startingLife;
+    }
+    private void GetHurted(float damage)
+    {
+        if (currentLife > 0)
+        {
+            currentLife -= damage;
+            onLifeChanged.Invoke(this, currentLife);
+            if (currentLife < 0) { onLifeDepleted.Invoke(this); }
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void GetHurted_ServerRPC(float damage)
+    {
+        GetHurted_ClientRPC(damage);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void GetHurted_ClientRPC(float damage)
+    {
+        if (IsLocalPlayer)
+        {
+            GetHurted(damage);
+        }
     }
 }
