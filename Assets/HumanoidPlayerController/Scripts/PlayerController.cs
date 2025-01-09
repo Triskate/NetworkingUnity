@@ -64,7 +64,7 @@ namespace HumanoidPlayerController
         Vector3 desiredForwardServer;
         private void Update()
         {
-            if (IsClient)
+            if (IsLocalPlayer)
             {
                 // Movimiento
                 Vector3 movement = mainCamera.transform.TransformDirection(rawMovement);
@@ -89,11 +89,6 @@ namespace HumanoidPlayerController
                         break;
                 }
                 DoSetDesiredForward_ServerRPC(desiredForwardClient);
-
-                // Animación
-                Vector3 localMovementOnPlane = transform.InverseTransformDirection(movementOnPlaneServer);
-                animator.SetFloat("ForwardVelocity", localMovementOnPlane.z);
-                animator.SetFloat("HorizontalVelocity", localMovementOnPlane.x);
             }
 
 
@@ -106,7 +101,10 @@ namespace HumanoidPlayerController
                 Quaternion rotationToApply = Quaternion.AngleAxis(angleToApply, Vector3.up);
                 transform.rotation = rotationToApply * transform.rotation;
 
-
+                // Animación
+                Vector3 localMovementOnPlane = transform.InverseTransformDirection(movementOnPlaneServer);
+                animator.SetFloat("ForwardVelocity", localMovementOnPlane.z);
+                animator.SetFloat("HorizontalVelocity", localMovementOnPlane.x);
             }
 
         }
@@ -147,7 +145,7 @@ namespace HumanoidPlayerController
         Vector3 rawMovement;
         private void OnMove(InputAction.CallbackContext context)
         {
-            if (IsOwner)
+            if (IsLocalPlayer)
             {
                 Vector2 movementValue = context.ReadValue<Vector2>();
                 rawMovement = Vector3.zero;
