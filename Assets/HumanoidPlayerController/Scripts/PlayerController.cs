@@ -98,6 +98,16 @@ namespace HumanoidPlayerController
 
             if (IsServer)
             {
+                // SmoothVelocity
+                float transicionAcceleration = desiredSpeed == Vector3.zero ? decceleration : acceleration;
+                Vector3 speedTransitionDirection = desiredSpeed - currentSpeed;
+                float speedTransitionDistance = speedTransitionDirection.magnitude;
+                if (speedTransitionDistance < transicionAcceleration * Time.deltaTime) { currentSpeed = desiredSpeed; }
+                else { currentSpeed += speedTransitionDirection.normalized * transicionAcceleration * Time.deltaTime; }
+
+                // Movimiento
+                characterController.Move(currentSpeed * Time.deltaTime);
+
                 // Orientación
                 float angularDistance = Vector3.SignedAngle(transform.forward, desiredForwardServer, Vector3.up);
                 float angularStep = angularSpeed * Time.deltaTime;
@@ -119,7 +129,7 @@ namespace HumanoidPlayerController
         [Rpc(SendTo.Server)]
         private void DoMove_ServerRPC(Vector3 movementOnPlane)
         {
-            characterController.Move(movementOnPlane * walkSpeed * Time.deltaTime);
+            
             movementOnPlaneServer = movementOnPlane; // Actualiza el movementOnPlain para que sean iguales en cliente y servidor
             desiredSpeed = movementOnPlane * walkSpeed;
         }
