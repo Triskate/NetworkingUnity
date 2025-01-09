@@ -12,7 +12,10 @@ namespace HumanoidPlayerController
     {
         [Header("Plane Movement")]
         [SerializeField] float walkSpeed = 5f;
-        [SerializeField] float runSpeed = 10F;
+        [SerializeField] float runSpeed = 10f;
+        [SerializeField] float acceleration = 20f;
+        [SerializeField] float decceleration = 50f;
+        Vector3 currentSpeed;
 
         [Header("Vertical Movement")]
         [SerializeField] float jumpSpeed = 5f;
@@ -61,6 +64,7 @@ namespace HumanoidPlayerController
         }
 
         Vector3 movementOnPlaneServer;
+        Vector3 desiredSpeed;
         Vector3 desiredForwardServer;
         private void Update()
         {
@@ -117,6 +121,7 @@ namespace HumanoidPlayerController
         {
             characterController.Move(movementOnPlane * walkSpeed * Time.deltaTime);
             movementOnPlaneServer = movementOnPlane; // Actualiza el movementOnPlain para que sean iguales en cliente y servidor
+            desiredSpeed = movementOnPlane * walkSpeed;
         }
 
         // Función que actualiza el desiredForward al servidor
