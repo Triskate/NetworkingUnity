@@ -60,8 +60,8 @@ namespace HumanoidPlayerController
             jump.action.performed += OnJump;
         }
 
-        Vector3 movementOnPlaneClient;
         Vector3 movementOnPlaneServer;
+        Vector3 desiredForwardServer;
         private void Update()
         {
             if (IsClient)
@@ -69,34 +69,26 @@ namespace HumanoidPlayerController
                 // Movimiento
                 Vector3 movement = mainCamera.transform.TransformDirection(rawMovement);
                 float originalMagnitude = movement.magnitude;
-                movementOnPlaneClient = Vector3.ProjectOnPlane(movement, Vector3.up);
+                Vector3 movementOnPlaneClient = Vector3.ProjectOnPlane(movement, Vector3.up);
                 movementOnPlaneClient = movementOnPlaneClient.normalized * originalMagnitude;
 
                 DoMove_ServerRPC(movementOnPlaneClient);
-            }
 
-
-            if (IsServer)
-            {
                 // Orientación
-                Vector3 desiredForward = Vector3.zero;
+                Vector3 desiredForwardClient = Vector3.zero;
                 switch (orientationMode)
                 {
                     case OrientationMode.MovementDirection:
-                        desiredForward = movementOnPlaneServer;
+                        desiredForwardClient = movementOnPlaneServer;
                         break;
                     case OrientationMode.CameraForward:
-                        desiredForward = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up);
+                        desiredForwardClient = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up);
                         break;
                     case OrientationMode.LookAtTarget:
-                        desiredForward = Vector3.ProjectOnPlane(target.position - transform.position, Vector3.up);
+                        desiredForwardClient = Vector3.ProjectOnPlane(target.position - transform.position, Vector3.up);
                         break;
                 }
-                float angularDistance = Vector3.SignedAngle(transform.forward, desiredForward, Vector3.up);
-                float angularStep = angularSpeed * Time.deltaTime;
-                float angleToApply = Mathf.Sign(angularDistance) * Mathf.Min(angularStep, Mathf.Abs(angularDistance));
-                Quaternion rotationToApply = Quaternion.AngleAxis(angleToApply, Vector3.up);
-                transform.rotation = rotationToApply * transform.rotation;
+                DoSetDesiredForward_ServerRPC(desiredForwardClient);
 
                 // Animación
                 Vector3 localMovementOnPlane = transform.InverseTransformDirection(movementOnPlaneServer);
@@ -104,7 +96,22 @@ namespace HumanoidPlayerController
                 animator.SetFloat("HorizontalVelocity", localMovementOnPlane.x);
             }
 
+
+            if (IsServer)
+            {
+                // Orientación
+                float angularDistance = Vector3.SignedAngle(transform.forward, desiredForwardServer, Vector3.up);
+                float angularStep = angularSpeed * Time.deltaTime;
+                float angleToApply = Mathf.Sign(angularDistance) * Mathf.Min(angularStep, Mathf.Abs(angularDistance));
+                Quaternion rotationToApply = Quaternion.AngleAxis(angleToApply, Vector3.up);
+                transform.rotation = rotationToApply * transform.rotation;
+
+
+            }
+
         }
+
+
 
         // Función que envia el movimiento al servidor
         [Rpc(SendTo.Server)]
@@ -112,6 +119,13 @@ namespace HumanoidPlayerController
         {
             characterController.Move(movementOnPlane * walkSpeed * Time.deltaTime);
             movementOnPlaneServer = movementOnPlane; // Actualiza el movementOnPlain para que sean iguales en cliente y servidor
+        }
+
+        // Función que actualiza el desiredForward al servidor
+        [Rpc(SendTo.Server)]
+        private void DoSetDesiredForward_ServerRPC(Vector3 desiredForward)
+        {
+            desiredForwardServer = desiredForward;
         }
 
         private void OnDisable()
@@ -129,6 +143,7 @@ namespace HumanoidPlayerController
             jump.action.performed -= OnJump;
         }
 
+        // Funciones de movimiento
         Vector3 rawMovement;
         private void OnMove(InputAction.CallbackContext context)
         {
