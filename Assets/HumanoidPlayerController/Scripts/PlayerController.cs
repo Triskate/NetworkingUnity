@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,7 +8,7 @@ using static HumanoidPlayerController.PlayerController;
 
 namespace HumanoidPlayerController
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
         [Header("Plane Movement")]
         [SerializeField] float walkSpeed = 5f;
@@ -46,65 +47,92 @@ namespace HumanoidPlayerController
 
         private void OnEnable()
         {
-            move.action.Enable();
-            run.action.Enable();
-            jump.action.Enable();
+            if (IsClient || IsHost)
+            {
+                move.action.Enable();
+                run.action.Enable();
+                jump.action.Enable();
 
-            move.action.performed += OnMove;
-            move.action.canceled += OnMove;
+                move.action.performed += OnMove;
+                move.action.canceled += OnMove;
 
-            run.action.started += OnRun;
-            run.action.canceled += OnRun;
+                run.action.started += OnRun;
+                run.action.canceled += OnRun;
 
-            jump.action.performed += OnJump;
+                jump.action.performed += OnJump;
+            }
         }
 
+        Vector3 movementOnPlaneClient;
+        Vector3 movementOnPlaneServer;
         private void Update()
         {
-            Vector3 movement = mainCamera.transform.TransformDirection(rawMovement);
-            float originalMagnitude = movement.magnitude;
-            Vector3 movementOnPlain = Vector3.ProjectOnPlane(movement, Vector3.up);
-            movementOnPlain = movementOnPlain.normalized * originalMagnitude;
-            characterController.Move(movementOnPlain * walkSpeed * Time.deltaTime);
-
-            Vector3 desiredForward = Vector3.zero;
-            switch (orientationMode)
+            if (IsClient || IsHost)
             {
-                case OrientationMode.MovementDirection:
-                    desiredForward = movementOnPlain;
-                    break;
-                case OrientationMode.CameraForward:
-                    desiredForward = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up);
-                    break;
-                case OrientationMode.LookAtTarget:
-                    desiredForward = Vector3.ProjectOnPlane(target.position - transform.position, Vector3.up);
-                    break;
+                // Movimiento
+                Vector3 movement = mainCamera.transform.TransformDirection(rawMovement);
+                float originalMagnitude = movement.magnitude;
+                movementOnPlaneClient = Vector3.ProjectOnPlane(movement, Vector3.up);
+                movementOnPlaneClient = movementOnPlaneClient.normalized * originalMagnitude;
+
+                DoMove_ServerRPC(movementOnPlaneClient);
             }
 
-            float angularDistance = Vector3.SignedAngle(transform.forward, desiredForward, Vector3.up);
-            float angularStep = angularSpeed * Time.deltaTime;
-            float angleToApply = Mathf.Sign(angularDistance) * Mathf.Min(angularStep, Mathf.Abs(angularDistance));
-            Quaternion rotationToApply = Quaternion.AngleAxis(angleToApply, Vector3.up);
-            transform.rotation = rotationToApply * transform.rotation;
 
-            Vector3 localMovementOnPlain = transform.InverseTransformDirection(movementOnPlain);
-            animator.SetFloat("ForwardVelocity", localMovementOnPlain.z);
-            animator.SetFloat("HorizontalVelocity", localMovementOnPlain.x);
+            if (IsServer)
+            {
+                // Orientación
+                Vector3 desiredForward = Vector3.zero;
+                switch (orientationMode)
+                {
+                    case OrientationMode.MovementDirection:
+                        desiredForward = movementOnPlaneServer;
+                        break;
+                    case OrientationMode.CameraForward:
+                        desiredForward = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up);
+                        break;
+                    case OrientationMode.LookAtTarget:
+                        desiredForward = Vector3.ProjectOnPlane(target.position - transform.position, Vector3.up);
+                        break;
+                }
+                float angularDistance = Vector3.SignedAngle(transform.forward, desiredForward, Vector3.up);
+                float angularStep = angularSpeed * Time.deltaTime;
+                float angleToApply = Mathf.Sign(angularDistance) * Mathf.Min(angularStep, Mathf.Abs(angularDistance));
+                Quaternion rotationToApply = Quaternion.AngleAxis(angleToApply, Vector3.up);
+                transform.rotation = rotationToApply * transform.rotation;
+
+                // Animación
+                Vector3 localMovementOnPlane = transform.InverseTransformDirection(movementOnPlaneServer);
+                animator.SetFloat("ForwardVelocity", localMovementOnPlane.z);
+                animator.SetFloat("HorizontalVelocity", localMovementOnPlane.x);
+            }
+
+        }
+
+        // Función que envia el movimiento al servidor
+        [Rpc(SendTo.Server)]
+        private void DoMove_ServerRPC(Vector3 movementOnPlane)
+        {
+            characterController.Move(movementOnPlane * walkSpeed * Time.deltaTime);
+            movementOnPlaneServer = movementOnPlane; // Actualiza el movementOnPlain para que sean iguales en cliente y servidor
         }
 
         private void OnDisable()
         {
-            move.action.Disable();
-            run.action.Disable();
-            jump.action.Disable();
+            if (IsClient || IsHost)
+            {
+                move.action.Disable();
+                run.action.Disable();
+                jump.action.Disable();
 
-            move.action.performed -= OnMove;
-            move.action.canceled -= OnMove;
+                move.action.performed -= OnMove;
+                move.action.canceled -= OnMove;
 
-            run.action.started -= OnRun;
-            run.action.canceled -= OnRun;
+                run.action.started -= OnRun;
+                run.action.canceled -= OnRun;
 
-            jump.action.performed -= OnJump;
+                jump.action.performed -= OnJump;
+            }
         }
 
         Vector3 rawMovement;
